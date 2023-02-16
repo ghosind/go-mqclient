@@ -23,7 +23,7 @@ type amqp091Client struct {
 func newAmqp091Client(config Config) (*amqp091Client, error) {
 	cli := new(amqp091Client)
 
-	cli.parseServers(config.Servers)
+	cli.parseServers(config)
 
 	cli.isConnected = false
 
@@ -110,22 +110,26 @@ func (cli *amqp091Client) isConnecting() bool {
 	return true
 }
 
-func (cli *amqp091Client) parseServers(servers []ServerConfig) {
-	if len(servers) == 0 {
+func (cli *amqp091Client) parseServers(config Config) {
+	user := utils.Conditional(config.User == "", amqpDefaultUser, config.User)
+	pass := utils.Conditional(config.Pass == "", amqpDefaultPass, config.Pass)
+	vhost := utils.Conditional(config.VHost == "", amqpDefaultVHost, config.VHost)
+
+	if len(config.Servers) == 0 {
 		cli.uris = make([]string, 1)
 		cli.uris[0] = amqp091.URI{
 			Scheme:   "amqp",
 			Host:     "127.0.0.1",
 			Port:     amqpDefaultPort,
-			Username: amqpDefaultUser,
-			Password: amqpDefaultPass,
-			Vhost:    amqpDefaultVHost,
+			Username: user,
+			Password: pass,
+			Vhost:    vhost,
 		}.String()
 		return
 	}
 
-	cli.uris = make([]string, 0, len(servers))
-	for _, server := range servers {
+	cli.uris = make([]string, 0, len(config.Servers))
+	for _, server := range config.Servers {
 		uri := amqp091.URI{
 			Scheme: utils.Conditional(server.SSL, "amqps", "amqp"),
 			Host:   utils.Conditional(server.Host == "", "127.0.0.1", server.Host),
@@ -134,9 +138,9 @@ func (cli *amqp091Client) parseServers(servers []ServerConfig) {
 				utils.Conditional(server.SSL, amqpDefaultPortSSL, amqpDefaultPort),
 				server.Port,
 			),
-			Username: utils.Conditional(server.User == "", amqpDefaultUser, server.User),
-			Password: utils.Conditional(server.Pass == "", amqpDefaultPass, server.Pass),
-			Vhost:    utils.Conditional(server.VHost == "", amqpDefaultVHost, server.VHost),
+			Username: user,
+			Password: pass,
+			Vhost:    vhost,
 		}
 
 		cli.uris = append(cli.uris, uri.String())
