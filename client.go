@@ -14,6 +14,8 @@ func newClientByProtocol(protocol string, config Config) (client, error) {
 	switch strings.TrimSpace(strings.ToLower(config.Protocol)) {
 	case ProtocolAMQP091:
 		return newAmqp091Client(config)
+	case ProtocolSTOMP:
+		return newStompClient(config)
 	default:
 		return nil, ErrUnsupportedProtocol
 	}

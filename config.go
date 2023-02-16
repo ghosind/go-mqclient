@@ -1,8 +1,10 @@
 package mqclient
 
 const (
-	// Protocol AMQP 0.9.1
+	// AMQP protocol version 0.9.1
 	ProtocolAMQP091 = "amqp091"
+	// Stomp protocol
+	ProtocolSTOMP = "stomp"
 )
 
 type ServerConfig struct {
