@@ -102,6 +102,7 @@ func (cli *stompClient) close() error {
 		}
 
 		cli.conn = nil
+		cli.netConn = nil
 	}
 
 	if cli.netConn != nil {
