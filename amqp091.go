@@ -1,6 +1,7 @@
 package mqclient
 
 import (
+	"errors"
 	"sync"
 
 	"github.com/ghosind/utils"
@@ -108,6 +109,11 @@ func (cli *amqp091Client) isConnecting() bool {
 	}
 
 	return true
+}
+
+func (cli *amqp091Client) publish(input PublishInput) error {
+	// TODO
+	return errors.New("not implemented")
 }
 
 func (cli *amqp091Client) parseServers(config Config) {

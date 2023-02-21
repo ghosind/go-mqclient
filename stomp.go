@@ -123,6 +123,19 @@ func (cli *stompClient) isConnecting() bool {
 	return cli.isConnected
 }
 
+func (cli *stompClient) publish(input PublishInput) error {
+	destination, err := cli.getDestination(input)
+	if err != nil {
+		return err
+	}
+
+	if err := cli.conn.Send(destination, input.ContentType, input.Body); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (cli *stompClient) parseServers(config Config) {
 
 	if len(config.Servers) == 0 {
@@ -154,4 +167,18 @@ func (cli *stompClient) connectToServer(server *stompServer) (io.ReadWriteCloser
 	} else {
 		return net.Dial("tcp", server.address)
 	}
+}
+
+func (cli *stompClient) getDestination(input PublishInput) (string, error) {
+	destination := ""
+
+	if input.Queue != "" {
+		destination = "/queue/" + input.Queue
+	} else if input.Topic != "" {
+		destination = "/topic/" + input.Topic
+	} else {
+		return "", ErrUnknownDestination
+	}
+
+	return destination, nil
 }

@@ -38,3 +38,11 @@ func (cli *Client) Connect() error {
 func (cli *Client) Close() error {
 	return cli.client.close()
 }
+
+func (cli *Client) Publish(input PublishInput) error {
+	if err := cli.Connect(); err != nil {
+		return err
+	}
+
+	return cli.client.publish(input)
+}
