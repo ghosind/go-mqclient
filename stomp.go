@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strconv"
 	"sync"
 
 	"github.com/ghosind/utils"
 	"github.com/go-stomp/stomp"
+	"github.com/go-stomp/stomp/frame"
 )
 
 const (
@@ -129,7 +131,9 @@ func (cli *stompClient) publish(input PublishInput) error {
 		return err
 	}
 
-	if err := cli.conn.Send(destination, input.ContentType, input.Body); err != nil {
+	opts := cli.getSendOpts(input)
+
+	if err := cli.conn.Send(destination, input.ContentType, input.Body, opts...); err != nil {
 		return err
 	}
 
@@ -181,4 +185,23 @@ func (cli *stompClient) getDestination(input PublishInput) (string, error) {
 	}
 
 	return destination, nil
+}
+
+func (cli *stompClient) getSendOpts(input PublishInput) []func(*frame.Frame) error {
+	opts := make([]func(*frame.Frame) error, 0)
+
+	if input.Expires > 0 {
+		opts = append(opts, stomp.SendOpt.Header("expires", strconv.Itoa(input.Expires)))
+	}
+	if input.MessageId != "" {
+		opts = append(opts, stomp.SendOpt.Header("message-id", input.MessageId))
+	}
+	if input.Persistent {
+		opts = append(opts, stomp.SendOpt.Header("persistent", "true"))
+	}
+	if input.Priority > 0 {
+		opts = append(opts, stomp.SendOpt.Header("priority", strconv.Itoa(input.Priority)))
+	}
+
+	return opts
 }

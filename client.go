@@ -7,6 +7,10 @@ import (
 type PublishInput struct {
 	Body        []byte
 	ContentType string
+	Expires     int
+	MessageId   string
+	Persistent  bool
+	Priority    int
 	Queue       string
 	Topic       string
 }
